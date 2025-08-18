@@ -13,6 +13,12 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   const [originalImage, setOriginalImage] = useState<string>('');
   const [encryptedImage, setEncryptedImage] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [originalImageBase64, setOriginalImageBase64] = useState<string>('');
+  
+  // 步骤状态
+  const [step1Complete, setStep1Complete] = useState(false); // 图片加载完成
+  const [step2Complete, setStep2Complete] = useState(false); // 密码生成完成
+  const [step3Complete, setStep3Complete] = useState(false); // AES加密完成
 
   // 生成EVM地址格式的密码
   const generateEvmPassword = () => {
@@ -91,85 +97,179 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     return canvas.toDataURL('image/png');
   };
 
-  // 处理加密过程
-  const handleEncrypt = async () => {
+  // 加载原始图片
+  const loadOriginalImage = async () => {
     try {
-      if (!originalImage) {
-        // 加载原始图片
-        const imageBase64 = await imageToBase64('/CT.jpeg');
-        setOriginalImage('data:image/jpeg;base64,' + imageBase64);
-
-        // 生成密码
-        const newPassword = generateEvmPassword();
-        setPassword(newPassword);
-        onPasswordGenerated?.(newPassword);
-
-        // 加密图片
-        const encrypted = await encryptImage(imageBase64, newPassword);
-        
-        // 生成乱码图片显示
-        const encryptedImageDisplay = generateEncryptedImageDisplay(encrypted);
-        setEncryptedImage(encryptedImageDisplay);
-        
-        onEncryptedImageGenerated?.(encrypted);
-      }
+      const imageBase64 = await imageToBase64('/CT.jpeg');
+      setOriginalImageBase64(imageBase64);
+      setOriginalImage('data:image/jpeg;base64,' + imageBase64);
+      setStep1Complete(true);
     } catch (error) {
-      console.error('处理失败:', error);
+      console.error('加载图片失败:', error);
     }
   };
 
+  // 生成随机密码
+  const handleGeneratePassword = () => {
+    const newPassword = generateEvmPassword();
+    setPassword(newPassword);
+    onPasswordGenerated?.(newPassword);
+    setStep2Complete(true);
+  };
+
+  // 处理AES加密
+  const handleAESEncrypt = async () => {
+    if (!originalImageBase64 || !password) return;
+    
+    try {
+      // 加密图片
+      const encrypted = await encryptImage(originalImageBase64, password);
+      
+      // 生成乱码图片显示
+      const encryptedImageDisplay = generateEncryptedImageDisplay(encrypted);
+      setEncryptedImage(encryptedImageDisplay);
+      
+      onEncryptedImageGenerated?.(encrypted);
+      setStep3Complete(true);
+    } catch (error) {
+      console.error('加密失败:', error);
+    }
+  };
+
+  // 重置所有状态
+  const resetSteps = () => {
+    setOriginalImage('');
+    setEncryptedImage('');
+    setPassword('');
+    setOriginalImageBase64('');
+    setStep1Complete(false);
+    setStep2Complete(false);
+    setStep3Complete(false);
+  };
+
   useEffect(() => {
-    // 组件加载时自动处理图片
-    handleEncrypt();
+    // 组件加载时自动加载原始图片
+    loadOriginalImage();
   }, []);
 
   return (
     <div className="image-display">
-      <div className="image-section">
-        <h3>原始图片</h3>
+      {/* 步骤1: 显示原始图片 */}
+      <div className="step-section">
+        <h4>📸 原始图片</h4>
         {originalImage ? (
-          <img src={originalImage} alt="原始图片" style={{ maxWidth: '300px', height: 'auto' }} />
+          <img src={originalImage} alt="原始图片" style={{ maxWidth: '300px', height: 'auto', border: '1px solid #ddd', borderRadius: '8px' }} />
         ) : (
           <div className="loading">加载中...</div>
         )}
-      </div>
-
-      <div className="image-section">
-        <h3>AES加密后的图片 (乱码显示)</h3>
-        {encryptedImage ? (
-          <img src={encryptedImage} alt="加密后的乱码图片" style={{ maxWidth: '300px', height: 'auto' }} />
-        ) : (
-          <div className="loading">生成中...</div>
+        {step1Complete && (
+          <div style={{ marginTop: '10px', color: '#28a745', fontSize: '14px' }}>
+            ✅ 图片加载完成
+          </div>
         )}
       </div>
 
-      <div className="password-section">
-        <h3>生成的EVM地址密码</h3>
-        <code style={{ 
-          background: '#f0f0f0', 
-          padding: '8px', 
-          borderRadius: '4px',
-          fontFamily: 'monospace',
-          wordBreak: 'break-all'
-        }}>
-          {password || '生成中...'}
-        </code>
+      {/* 步骤2: 生成随机密码 */}
+      <div className="step-section" style={{ marginTop: '20px' }}>
+        <h4>🔑 生成EVM地址格式密码</h4>
+        {step2Complete ? (
+          <div>
+            <code style={{ 
+              background: '#f8f9fa', 
+              padding: '12px', 
+              borderRadius: '6px',
+              fontFamily: 'monospace',
+              wordBreak: 'break-all',
+              display: 'block',
+              border: '1px solid #e9ecef'
+            }}>
+              {password}
+            </code>
+            <div style={{ marginTop: '10px', color: '#28a745', fontSize: '14px' }}>
+              ✅ 密码生成完成
+            </div>
+          </div>
+        ) : (
+          <button 
+            onClick={handleGeneratePassword}
+            disabled={!step1Complete}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: step1Complete ? '#007bff' : '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: step1Complete ? 'pointer' : 'not-allowed',
+              fontSize: '16px',
+              fontWeight: '500'
+            }}
+          >
+            生成随机密码
+          </button>
+        )}
       </div>
 
-      <button 
-        onClick={handleEncrypt} 
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          marginTop: '10px'
-        }}
-      >
-        重新生成密码和加密
-      </button>
+      {/* 步骤3: AES加密图片 */}
+      <div className="step-section" style={{ marginTop: '20px' }}>
+        <h4>🔐 AES加密图片</h4>
+        {step3Complete ? (
+          <div>
+            <img 
+              src={encryptedImage} 
+              alt="加密后的乱码图片" 
+              style={{ 
+                maxWidth: '300px', 
+                height: 'auto',
+                border: '1px solid #ddd', 
+                borderRadius: '8px' 
+              }} 
+            />
+            <div style={{ marginTop: '10px', color: '#28a745', fontSize: '14px' }}>
+              ✅ AES加密完成
+            </div>
+          </div>
+        ) : step2Complete ? (
+          <button 
+            onClick={handleAESEncrypt}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '500'
+            }}
+          >
+            AES加密图片
+          </button>
+        ) : (
+          <div style={{ color: '#6c757d', fontSize: '14px' }}>
+            请先生成密码
+          </div>
+        )}
+      </div>
+
+      {/* 重置按钮 */}
+      {(step2Complete || step3Complete) && (
+        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+          <button 
+            onClick={resetSteps}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            重新开始
+          </button>
+        </div>
+      )}
     </div>
   );
 };
