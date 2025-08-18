@@ -111,52 +111,92 @@ task("check-authorization", "Check if a user is authorized for an image")
     console.log(`User ${taskArgs.user} is ${isAuthorized ? 'authorized' : 'not authorized'} for image ${taskArgs.imageid}`);
   });
 
+task("generate-aes-key", "Generate a random AES key in EVM address format")
+  .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
+    const { ethers } = hre;
+    
+    // 生成一个随机的20字节地址格式密钥
+    const randomBytes = ethers.randomBytes(20);
+    const aesKey = ethers.getAddress(ethers.hexlify(randomBytes));
+    
+    console.log("Generated AES key (EVM address format):");
+    console.log(`  Address: ${aesKey}`);
+    console.log(`  Hex: ${aesKey}`);
+    console.log("");
+    console.log("Use this key with the upload-image task:");
+    console.log(`  npx hardhat upload-image --hash "your-image-hash" --aeskey "${aesKey}"`);
+  });
+
 task("upload-image", "Upload an encrypted image with AES key")
-  .addParam("contract", "The contract address")
+  .addOptionalParam("contract", "The contract address (auto-detected if not provided)")
   .addParam("hash", "The encrypted image hash")
-  .addParam("aeskey", "The AES key (in hex format)")
+  .addParam("aeskey", "The AES key in EVM address format (20 bytes, e.g., 0x1234...)")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     const { ethers, fhevm } = hre;
-    
+    const fs = require('fs');
+    const path = require('path');
+    await fhevm.initializeCLIApi();
     const [signer] = await ethers.getSigners();
+    
+    // 自动获取合约地址
+    let contractAddress = taskArgs.contract;
+    if (!contractAddress) {
+      try {
+        // 尝试从部署文件中读取合约地址
+        const deploymentPath = path.join(__dirname, '..', 'deployments', hre.network.name, 'SecureImageManager.json');
+        if (fs.existsSync(deploymentPath)) {
+          const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+          contractAddress = deployment.address;
+          console.log(`Auto-detected contract address: ${contractAddress}`);
+        } else {
+          throw new Error("No deployment file found");
+        }
+      } catch (error) {
+        console.error("Could not auto-detect contract address. Please provide --contract parameter");
+        console.error("You can deploy the contract first using: npx hardhat deploy-secure-image-manager");
+        return;
+      }
+    }
+    
     const secureImageManager = await ethers.getContractAt(
       "SecureImageManager",
-      taskArgs.contract,
+      contractAddress,
       signer
     );
     
     try {
       // 创建加密输入
-      const input = fhevm.createEncryptedInput(taskArgs.contract, signer.address);
+      const input = fhevm.createEncryptedInput(contractAddress, signer.address);
       
-      // 将AES密钥（hex格式）转换为BigInt
-      const aesKeyBigInt = BigInt(taskArgs.aeskey);
-      input.add256(aesKeyBigInt);
+      // 将AES密钥作为地址格式添加（20字节格式）
+      input.addAddress(taskArgs.aeskey);
       
       const encryptedInput = await input.encrypt();
       
       // 调用合约的uploadImage方法
       const tx = await secureImageManager.uploadImage(
-        taskArgs.hash,
         encryptedInput.handles[0], // 加密的AES密钥
-        encryptedInput.inputProof
+        encryptedInput.inputProof,
+        taskArgs.hash
       );
       
       const receipt = await tx.wait();
       
-      // 从事件中获取imageId
-      const uploadEvent = receipt.logs.find(
-        (log: any) => log.fragment && log.fragment.name === 'ImageUploaded'
-      );
-      
-      if (uploadEvent) {
-        console.log(`Image uploaded successfully!`);
-        console.log(`  Image ID: ${uploadEvent.args.imageId}`);
-        console.log(`  Hash: ${uploadEvent.args.hash}`);
-        console.log(`  Uploader: ${uploadEvent.args.uploader}`);
-        console.log(`  Transaction hash: ${tx.hash}`);
-      } else {
-        console.log(`Image uploaded successfully! Transaction hash: ${tx.hash}`);
+      if (receipt) {
+        // 从事件中获取imageId
+        const uploadEvent = receipt.logs.find(
+          (log: any) => log.fragment && log.fragment.name === 'ImageUploaded'
+        );
+        
+        if (uploadEvent && 'args' in uploadEvent) {
+          console.log(`Image uploaded successfully!`);
+          console.log(`  Image ID: ${uploadEvent.args.imageId}`);
+          // console.log(`  Hash: ${uploadEvent.args.hash}`);
+          console.log(`  Uploader: ${uploadEvent.args.uploader}`);
+          console.log(`  Transaction hash: ${tx.hash}`);
+        } else {
+          console.log(`Image uploaded successfully! Transaction hash: ${tx.hash}`);
+        }
       }
       
     } catch (error) {
