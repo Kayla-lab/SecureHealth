@@ -95,21 +95,21 @@ task("authorize-user", "Authorize a user to decrypt an image")
     }
   });
 
-task("check-authorization", "Check if a user is authorized for an image")
-  .addParam("contract", "The contract address")
-  .addParam("imageid", "The image ID")
-  .addParam("user", "The user address to check")
-  .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-    const { ethers } = hre;
+// task("check-authorization", "Check if a user is authorized for an image")
+//   .addParam("contract", "The contract address")
+//   .addParam("imageid", "The image ID")
+//   .addParam("user", "The user address to check")
+//   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
+//     const { ethers } = hre;
     
-    const secureImageManager = await ethers.getContractAt(
-      "SecureImageManager",
-      taskArgs.contract
-    );
+//     const secureImageManager = await ethers.getContractAt(
+//       "SecureImageManager",
+//       taskArgs.contract
+//     );
     
-    const isAuthorized = await secureImageManager.isAuthorized(taskArgs.imageid, taskArgs.user);
-    console.log(`User ${taskArgs.user} is ${isAuthorized ? 'authorized' : 'not authorized'} for image ${taskArgs.imageid}`);
-  });
+//     const isAuthorized = await secureImageManager.isAuthorized(taskArgs.imageid, taskArgs.user);
+//     console.log(`User ${taskArgs.user} is ${isAuthorized ? 'authorized' : 'not authorized'} for image ${taskArgs.imageid}`);
+//   });
 
 task("generate-aes-key", "Generate a random AES key in EVM address format")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
