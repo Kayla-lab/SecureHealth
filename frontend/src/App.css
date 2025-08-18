@@ -46,6 +46,7 @@
 }
 
 .upload-section,
+.my-images-section,
 .decrypt-section,
 .info-section {
   background: #f8f9fa;
@@ -55,6 +56,7 @@
 }
 
 .upload-section h2,
+.my-images-section h2,
 .decrypt-section h2,
 .info-section h2 {
   margin-bottom: 1.5rem;
@@ -130,6 +132,21 @@
 .success-message h3 {
   margin-bottom: 0.5rem;
   color: #155724;
+}
+
+.selected-image-info {
+  background: #e7f3ff;
+  border: 1px solid #b8daff;
+  color: #004085;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.selected-image-info p {
+  margin: 0;
+  font-weight: 500;
 }
 
 .info-content h3 {

@@ -6,6 +6,7 @@ import { ImageDisplay } from './components/ImageDisplay';
 import { IPFSUpload } from './components/IPFSUpload';
 import { ZamaIntegration } from './components/ZamaIntegration';
 import { DecryptImage } from './components/DecryptImage';
+import { UserImageList } from './components/UserImageList';
 
 function App() {
   const { isConnected } = useAccount();
@@ -14,6 +15,7 @@ function App() {
   const [ipfsHash, setIpfsHash] = useState<string>('');
   const [fhevmInstance, setFhevmInstance] = useState<any>(null);
   const [uploadedImageId, setUploadedImageId] = useState<number | null>(null);
+  const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
 
   // 初始化FHEVM实例
   useEffect(() => {
@@ -54,6 +56,10 @@ function App() {
 
   const handleContractCall = (imageId: number) => {
     setUploadedImageId(imageId);
+  };
+
+  const handleSelectImage = (imageId: number) => {
+    setSelectedImageId(imageId);
   };
 
   return (
@@ -110,9 +116,19 @@ function App() {
           </div>
         </div>
         
+        <div className="my-images-section">
+          <h2>📋 我的图片</h2>
+          <UserImageList onSelectImage={handleSelectImage} />
+        </div>
+
         <div className="decrypt-section">
           <h2>🔓 解密图片</h2>
-          <DecryptImage fhevmInstance={fhevmInstance} />
+          {selectedImageId && (
+            <div className="selected-image-info">
+              <p>🎯 当前选中的图片ID: <strong>{selectedImageId}</strong></p>
+            </div>
+          )}
+          <DecryptImage fhevmInstance={fhevmInstance} selectedImageId={selectedImageId} />
         </div>
 
         <div className="info-section">
