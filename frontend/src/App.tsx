@@ -1,11 +1,19 @@
 import './App.css'
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>SecureHealth</h1>
-        <p>Secure Image Management with Blockchain</p>
+        <div className="header-content">
+          <div className="title-section">
+            <h1>SecureHealth</h1>
+            <p>Secure Image Management with Blockchain</p>
+          </div>
+          <div className="wallet-section">
+            <ConnectButton />
+          </div>
+        </div>
       </header>
       
       <main className="app-main">
