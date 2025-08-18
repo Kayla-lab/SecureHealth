@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {FHE, euint256, externalEuint256, eaddress, externalEaddress} from "@fhevm/solidity/lib/FHE.sol";
+import {FHE, eaddress, externalEaddress} from "@fhevm/solidity/lib/FHE.sol";
 import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 
 /// @title Secure Image Manager Contract
@@ -9,7 +9,7 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 contract SecureImageManager is SepoliaConfig {
     
     struct ImageRecord {
-        euint256 encryptedPassword;  // FHE encrypted password (EVM address format)
+        eaddress encryptedPassword;  // FHE encrypted password (EVM address format)
         address uploader;            // Address of the uploader
         string imageHash;            // Hash of the encrypted image
         uint256 timestamp;           // When the image was uploaded
@@ -39,14 +39,14 @@ contract SecureImageManager is SepoliaConfig {
     /// @param imageHash The hash of the encrypted image data
     /// @return imageId The ID of the uploaded image
     function uploadImage(
-        externalEuint256 encryptedPassword,
+        externalEaddress encryptedPassword,
         bytes calldata inputProof,
         string calldata imageHash
     ) external returns (uint256) {
         uint256 imageId = nextImageId++;
         
-        // Convert external encrypted input to internal euint256
-        euint256 password = FHE.fromExternal(encryptedPassword, inputProof);
+        // Convert external encrypted input to internal eaddress
+        eaddress password = FHE.fromExternal(encryptedPassword, inputProof);
         
         // Create image record
         images[imageId] = ImageRecord({
@@ -105,7 +105,7 @@ contract SecureImageManager is SepoliaConfig {
     /// @notice Get the encrypted password for an image (only for authorized users)
     /// @param imageId The ID of the image
     /// @return The encrypted password
-    function getEncryptedPassword(uint256 imageId) external view returns (euint256) {
+    function getEncryptedPassword(uint256 imageId) external view returns (eaddress) {
         require(images[imageId].exists, "Image does not exist");
         require(authorizedUsers[imageId][msg.sender], "Not authorized to access this image");
         
