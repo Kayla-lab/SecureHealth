@@ -17,6 +17,14 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
     args: [BigInt(imageId)],
   });
 
+  // 获取加密密码
+  const { data: encryptedPassword, isError: passwordError, isLoading: passwordLoading } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'getEncryptedPassword',
+    args: [BigInt(imageId)],
+  });
+
   const handleClick = () => {
     onSelect(imageId);
   };
@@ -123,6 +131,23 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
           <span style={{ color: '#6b7280', fontSize: '14px' }}>上传时间:</span>
           <span style={{ color: '#374151', fontSize: '14px', fontWeight: 500 }}>
             {isLoading ? 'Loading...' : isError ? 'Error' : formatTimestamp(timestamp)}
+          </span>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '8px'
+        }}>
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>加密密码:</span>
+          <span style={{ 
+            color: '#374151', 
+            fontSize: '12px', 
+            fontFamily: 'monospace',
+            wordBreak: 'break-all',
+            maxWidth: '150px'
+          }}>
+            {passwordLoading ? 'Loading...' : passwordError ? 'Error' : `${(encryptedPassword as string)?.slice(0, 10)}...${(encryptedPassword as string)?.slice(-6)}`}
           </span>
         </div>
 
