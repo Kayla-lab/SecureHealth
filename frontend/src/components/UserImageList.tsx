@@ -30,29 +30,6 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
     }
   }, [userImageIds]);
 
-  // 获取每个图片的详细信息
-  useEffect(() => {
-    const fetchImageInfos = async () => {
-      if (!userImages.length) return;
-
-      const infos: {[key: number]: {uploader: string, imageHash: string, timestamp: number}} = {};
-      
-      // 我们将使用多个 useReadContract 调用来获取每个图片的信息
-      // 这里先设置加载状态
-      for (const imageId of userImages) {
-        infos[imageId] = {
-          uploader: 'Loading...',
-          imageHash: 'Loading...',
-          timestamp: 0
-        };
-      }
-      
-      setImageInfos(infos);
-    };
-
-    fetchImageInfos();
-  }, [userImages]);
-
   const handleSelectImage = (imageId: number) => {
     setSelectedImageId(imageId);
     if (onSelectImage) {
@@ -92,46 +69,12 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
           
           <div className="image-grid">
             {userImages.map((imageId) => (
-              <div
+              <ImageCard
                 key={imageId}
-                className={`image-card ${selectedImageId === imageId ? 'selected' : ''}`}
-                onClick={() => handleSelectImage(imageId)}
-              >
-                <div className="image-id">
-                  <span className="id-label">图片 ID:</span>
-                  <span className="id-value">{imageId}</span>
-                </div>
-                
-                <div className="image-details">
-                  <div className="detail-row">
-                    <span className="detail-label">上传时间:</span>
-                    <span className="detail-value">
-                      {imageInfos[imageId] ? 
-                        (imageInfos[imageId].timestamp > 0 ? 
-                          new Date(imageInfos[imageId].timestamp * 1000).toLocaleString() : 
-                          'Loading...') : 
-                        'Loading...'}
-                    </span>
-                  </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">状态:</span>
-                    <span className="detail-value status-active">✅ 活跃</span>
-                  </div>
-                </div>
-
-                <div className="action-buttons">
-                  <button 
-                    className="select-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectImage(imageId);
-                    }}
-                  >
-                    选择此图片
-                  </button>
-                </div>
-              </div>
+                imageId={imageId}
+                isSelected={selectedImageId === imageId}
+                onSelect={handleSelectImage}
+              />
             ))}
           </div>
         </div>
@@ -144,7 +87,7 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
         </div>
       )}
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{__html: `
         .user-image-list {
           background: white;
           border-radius: 12px;
@@ -206,104 +149,6 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
           gap: 16px;
         }
 
-        .image-card {
-          border: 2px solid #e5e5e5;
-          border-radius: 12px;
-          padding: 16px;
-          cursor: pointer;
-          transition: all 0.2s;
-          background: #fafafa;
-        }
-
-        .image-card:hover {
-          border-color: #6366f1;
-          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
-          transform: translateY(-2px);
-        }
-
-        .image-card.selected {
-          border-color: #10b981;
-          background: #f0fdf4;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-        }
-
-        .image-id {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-          padding-bottom: 12px;
-          border-bottom: 1px solid #e5e5e5;
-        }
-
-        .id-label {
-          font-weight: 600;
-          color: #374151;
-        }
-
-        .id-value {
-          font-size: 18px;
-          font-weight: bold;
-          color: #6366f1;
-          background: #f3f4f6;
-          padding: 4px 8px;
-          border-radius: 6px;
-        }
-
-        .image-details {
-          margin-bottom: 16px;
-        }
-
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 8px;
-        }
-
-        .detail-label {
-          color: #6b7280;
-          font-size: 14px;
-        }
-
-        .detail-value {
-          color: #374151;
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .status-active {
-          color: #10b981;
-        }
-
-        .action-buttons {
-          display: flex;
-          justify-content: center;
-        }
-
-        .select-btn {
-          background: #6366f1;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          padding: 10px 20px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .select-btn:hover {
-          background: #4f46e5;
-        }
-
-        .image-card.selected .select-btn {
-          background: #10b981;
-        }
-
-        .image-card.selected .select-btn:hover {
-          background: #059669;
-        }
-
         .selected-info {
           background: #f0fdf4;
           border: 1px solid #bbf7d0;
@@ -317,7 +162,7 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
           margin: 4px 0;
           color: #059669;
         }
-      `}</style>
+      `}} />
     </div>
   );
 };

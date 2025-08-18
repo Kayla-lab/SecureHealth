@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
+import React, { useState, useEffect } from 'react';
+import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import CryptoJS from 'crypto-js';
+import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../config/contract';
 
 interface DecryptImageProps {
   fhevmInstance?: any;
+  selectedImageId?: number | null;
 }
 
-export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => {
+export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selectedImageId }) => {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const [imageId, setImageId] = useState<string>('');
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptedPassword, setDecryptedPassword] = useState<string>('');
@@ -16,29 +19,57 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => 
   const [decryptedImage, setDecryptedImage] = useState<string>('');
   const [decryptResult, setDecryptResult] = useState<string>('');
 
-  // 合约地址 (Sepolia testnet)
-  const CONTRACT_ADDRESS = '0x953303a9Bda0A8264a1e936Bc9996b536DE02786';
+  // 监听选中的图片ID变化
+  useEffect(() => {
+    if (selectedImageId !== null && selectedImageId !== undefined) {
+      setImageId(selectedImageId.toString());
+    }
+  }, [selectedImageId]);
 
   // 从合约获取图片信息
   const getImageFromContract = async (id: string) => {
+    if (!publicClient) {
+      throw new Error('Public client not available');
+    }
+
     try {
-      // 模拟从合约获取数据
-      const mockIpfsHash = `QmTestHash${id}abcdef123456789`;
-      const mockEncryptedPasswordHandle = `0x${id.padStart(64, '0')}`;
+      const imageIdBigInt = BigInt(id);
       
-      console.log('模拟获取合约数据:', {
+      // 调用合约的 getImageInfo 方法
+      const imageInfo = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'getImageInfo',
+        args: [imageIdBigInt],
+      }) as [string, string, bigint];
+
+      const [uploader, ipfsHash, timestamp] = imageInfo;
+
+      // 调用合约的 getEncryptedPassword 方法
+      const encryptedPasswordHandle = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'getEncryptedPassword',
+        args: [imageIdBigInt],
+      }) as string;
+      
+      console.log('从合约获取数据:', {
         imageId: id,
-        ipfsHash: mockIpfsHash,
-        encryptedPasswordHandle: mockEncryptedPasswordHandle
+        uploader,
+        ipfsHash,
+        timestamp: Number(timestamp),
+        encryptedPasswordHandle
       });
 
       return {
-        ipfsHash: mockIpfsHash,
-        encryptedPasswordHandle: mockEncryptedPasswordHandle
+        ipfsHash,
+        encryptedPasswordHandle,
+        uploader,
+        timestamp: Number(timestamp)
       };
     } catch (error) {
       console.error('获取合约数据失败:', error);
-      throw error;
+      throw new Error(`获取图片信息失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -62,33 +93,43 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => 
       const durationDays = "10";
       const contractAddresses = [CONTRACT_ADDRESS];
 
-      // 创建EIP712签名
-      fhevmInstance.createEIP712(
+      // 创建EIP712签名数据
+      const eip712 = fhevmInstance.createEIP712(
         keypair.publicKey,
         contractAddresses,
         startTimeStamp,
         durationDays
       );
 
-      // 模拟签名 (实际应用中需要用户签名)
-      const mockSignature = "0x" + "a".repeat(130); // 模拟签名
+      // 请求用户签名
+      if (!walletClient.signTypedData) {
+        throw new Error('钱包不支持签名功能');
+      }
+
+      const signature = await walletClient.signTypedData({
+        domain: eip712.domain,
+        types: {
+          UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
+        },
+        primaryType: 'UserDecryptRequestVerification',
+        message: eip712.message,
+      });
       
-      // 执行用户解密 (模拟)
-      await fhevmInstance.userDecrypt(
+      // 执行用户解密
+      const result = await fhevmInstance.userDecrypt(
         handleContractPairs,
         keypair.privateKey,
         keypair.publicKey,
-        mockSignature.replace("0x", ""),
+        signature.replace("0x", ""),
         contractAddresses,
         address,
         startTimeStamp,
         durationDays
       );
 
-      // 模拟解密结果
-      const mockDecryptedPassword = `0x${'a'.repeat(40)}`;
-      console.log('模拟解密密码:', mockDecryptedPassword);
-      return mockDecryptedPassword;
+      const decryptedPassword = result[encryptedPasswordHandle];
+      console.log('解密密码成功:', decryptedPassword);
+      return decryptedPassword;
 
     } catch (error) {
       console.error('Zama解密失败:', error);
