@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
 import CryptoJS from 'crypto-js';
 
@@ -16,8 +16,8 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => 
   const [decryptedImage, setDecryptedImage] = useState<string>('');
   const [decryptResult, setDecryptResult] = useState<string>('');
 
-  // 合约地址 (需要根据实际部署地址修改)
-  const CONTRACT_ADDRESS = '0x8Fdb26641d14a80FCCBE87BF455338Dd9C539a50';
+  // 合约地址 (Sepolia testnet)
+  const CONTRACT_ADDRESS = '0x953303a9Bda0A8264a1e936Bc9996b536DE02786';
 
   // 从合约获取图片信息
   const getImageFromContract = async (id: string) => {
@@ -63,7 +63,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => 
       const contractAddresses = [CONTRACT_ADDRESS];
 
       // 创建EIP712签名
-      const eip712 = fhevmInstance.createEIP712(
+      fhevmInstance.createEIP712(
         keypair.publicKey,
         contractAddresses,
         startTimeStamp,
@@ -73,8 +73,8 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => 
       // 模拟签名 (实际应用中需要用户签名)
       const mockSignature = "0x" + "a".repeat(130); // 模拟签名
       
-      // 执行用户解密
-      const result = await fhevmInstance.userDecrypt(
+      // 执行用户解密 (模拟)
+      await fhevmInstance.userDecrypt(
         handleContractPairs,
         keypair.privateKey,
         keypair.publicKey,
@@ -97,7 +97,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance }) => 
   };
 
   // 模拟从IPFS获取加密图片数据
-  const getEncryptedImageFromIPFS = async (hash: string): Promise<string> => {
+  const getEncryptedImageFromIPFS = async (_hash: string): Promise<string> => {
     // 模拟IPFS获取延迟
     await new Promise(resolve => setTimeout(resolve, 1000));
     

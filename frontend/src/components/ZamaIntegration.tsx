@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
+import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { createInstance, SepoliaConfig } from '@zama-fhe/relayer-sdk/bundle';
 
 interface ZamaIntegrationProps {
@@ -15,12 +15,13 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
 }) => {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const [fhevmInstance, setFhevmInstance] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<string>('');
 
-  // 合约地址 (需要根据实际部署地址修改)
-  const CONTRACT_ADDRESS = '0x8Fdb26641d14a80FCCBE87BF455338Dd9C539a50'; // 示例地址
+  // 合约地址 (Sepolia testnet)
+  const CONTRACT_ADDRESS = '0x953303a9Bda0A8264a1e936Bc9996b536DE02786';
 
   // 初始化FHEVM实例
   useEffect(() => {
@@ -76,7 +77,7 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
 
       // 准备合约调用参数
       const contractCallData = {
-        address: CONTRACT_ADDRESS,
+        address: CONTRACT_ADDRESS as `0x${string}`,
         abi: [
           {
             "inputs": [
@@ -118,15 +119,35 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
 
       console.log('准备调用合约:', contractCallData);
 
-      // 调用合约 (这里需要使用viem进行实际的合约调用)
-      // const hash = await walletClient.writeContract(contractCallData);
+      // 调用合约
+      const hash = await walletClient.writeContract(contractCallData);
+      console.log('交易Hash:', hash);
       
-      // 模拟合约调用成功
-      const mockImageId = Math.floor(Math.random() * 1000);
-      setUploadResult(`图片上传成功! Image ID: ${mockImageId}`);
-      onContractCall?.(mockImageId);
+      setUploadResult(`交易已提交! 交易Hash: ${hash}`);
       
-      console.log('模拟合约调用成功, Image ID:', mockImageId);
+      // 等待交易确认
+      if (publicClient) {
+        setUploadResult(`交易已提交! 正在等待确认... 交易Hash: ${hash}`);
+        const receipt = await publicClient.waitForTransactionReceipt({ hash });
+        console.log('交易确认:', receipt);
+        
+        // 从receipt logs中解析imageId
+        if (receipt.logs && receipt.logs.length > 0) {
+          // ImageUploaded事件的第一个log通常包含imageId
+          const imageIdHex = receipt.logs[0].topics?.[1];
+          if (imageIdHex) {
+            const imageId = parseInt(imageIdHex, 16);
+            setUploadResult(`图片上传成功! Image ID: ${imageId}, 交易Hash: ${hash}`);
+            onContractCall?.(imageId);
+          } else {
+            setUploadResult(`交易成功确认! 交易Hash: ${hash}`);
+          }
+        } else {
+          setUploadResult(`交易成功确认! 交易Hash: ${hash}`);
+        }
+      } else {
+        setUploadResult(`交易已提交! 交易Hash: ${hash} (无法自动确认)`);
+      }
       
     } catch (error) {
       console.error('合约调用失败:', error);
@@ -190,11 +211,11 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
           )}
 
           <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-            <strong>注意:</strong> 这里使用模拟的合约调用。实际部署时需要：
+            <strong>合约信息:</strong>
             <ul style={{ marginLeft: '15px' }}>
-              <li>更新CONTRACT_ADDRESS为实际部署的合约地址</li>
-              <li>使用viem进行真实的合约调用</li>
-              <li>处理交易确认和错误</li>
+              <li>合约地址: {CONTRACT_ADDRESS}</li>
+              <li>网络: Sepolia 测试网</li>
+              <li>功能: 上传加密密码和IPFS Hash到区块链</li>
             </ul>
           </div>
         </div>

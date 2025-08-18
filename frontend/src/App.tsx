@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { ImageDisplay } from './components/ImageDisplay';
