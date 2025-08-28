@@ -1,7 +1,7 @@
-// 合约地址 (Sepolia testnet)
+// Contract address (Sepolia testnet)
 export const CONTRACT_ADDRESS = '0x953303a9Bda0A8264a1e936Bc9996b536DE02786' as const;
 
-// 合约ABI
+// Contract ABI
 export const CONTRACT_ABI = [
   {
     "inputs": [

@@ -224,9 +224,9 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
             <div style={{
               padding: '10px',
               borderRadius: '4px',
-              backgroundColor: uploadResult.includes('成功') ? '#d4edda' : '#f8d7da',
-              color: uploadResult.includes('成功') ? '#155724' : '#721c24',
-              border: `1px solid ${uploadResult.includes('成功') ? '#c3e6cb' : '#f5c6cb'}`
+              backgroundColor: uploadResult.includes('successful') ? '#d4edda' : '#f8d7da',
+              color: uploadResult.includes('successful') ? '#155724' : '#721c24',
+              border: `1px solid ${uploadResult.includes('successful') ? '#c3e6cb' : '#f5c6cb'}`
             }}>
               {uploadResult}
             </div>

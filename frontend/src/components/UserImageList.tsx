@@ -12,7 +12,7 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
   const [userImages, setUserImages] = useState<number[]>([]);
   const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
 
-  // 获取用户的图片ID列表
+  // Get user's image ID list
   const { data: userImageIds, refetch: refetchUserImages } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
@@ -44,7 +44,7 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
   if (!isConnected) {
     return (
       <div className="user-image-list">
-        <p>请先连接钱包查看您的图片</p>
+        <p>Please connect your wallet first to view your images</p>
       </div>
     );
   }
@@ -52,20 +52,20 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
   return (
     <div className="user-image-list">
       <div className="list-header">
-        <h3>📋 我的图片列表</h3>
+        <h3>📋 My Image List</h3>
         <button onClick={handleRefresh} className="refresh-btn">
-          🔄 刷新
+          🔄 Refresh
         </button>
       </div>
 
       {userImages.length === 0 ? (
         <div className="empty-state">
-          <p>您还没有上传任何图片</p>
-          <p>请先上传一张图片到系统中</p>
+          <p>You haven't uploaded any images yet</p>
+          <p>Please upload an image to the system first</p>
         </div>
       ) : (
         <div className="image-list">
-          <p className="list-count">共找到 {userImages.length} 张图片</p>
+          <p className="list-count">Found {userImages.length} image(s)</p>
           
           <div className="image-grid">
             {userImages.map((imageId) => (
@@ -82,8 +82,8 @@ export const UserImageList: React.FC<UserImageListProps> = ({ onSelectImage }) =
 
       {selectedImageId !== null && (
         <div className="selected-info">
-          <p>✅ 已选择图片 ID: <strong>{selectedImageId}</strong></p>
-          <p>您可以使用此ID进行解密操作</p>
+          <p>✅ Selected Image ID: <strong>{selectedImageId}</strong></p>
+          <p>You can use this ID for decryption operations</p>
         </div>
       )}
 

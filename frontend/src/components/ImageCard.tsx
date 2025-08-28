@@ -9,7 +9,7 @@ interface ImageCardProps {
 }
 
 export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSelect }) => {
-  // 获取图片详细信息
+  // Get image details
   const { data: imageInfo, isError, isLoading } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
@@ -17,7 +17,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
     args: [BigInt(imageId)],
   });
 
-  // 获取加密密码
+  // Get encrypted password
   const { data: encryptedPassword, isError: passwordError, isLoading: passwordLoading } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
@@ -75,7 +75,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
         paddingBottom: '12px',
         borderBottom: '1px solid #e5e5e5'
       }}>
-        <span style={{ fontWeight: 600, color: '#374151' }}>图片 ID:</span>
+        <span style={{ fontWeight: 600, color: '#374151' }}>Image ID:</span>
         <span style={{
           fontSize: '18px',
           fontWeight: 'bold',
@@ -94,7 +94,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
           justifyContent: 'space-between',
           marginBottom: '8px'
         }}>
-          <span style={{ color: '#6b7280', fontSize: '14px' }}>上传者:</span>
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>Uploader:</span>
           <span style={{ 
             color: '#374151', 
             fontSize: '12px', 
@@ -128,7 +128,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
           justifyContent: 'space-between',
           marginBottom: '8px'
         }}>
-          <span style={{ color: '#6b7280', fontSize: '14px' }}>上传时间:</span>
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>Upload Time:</span>
           <span style={{ color: '#374151', fontSize: '14px', fontWeight: 500 }}>
             {isLoading ? 'Loading...' : isError ? 'Error' : formatTimestamp(timestamp)}
           </span>
@@ -139,7 +139,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
           justifyContent: 'space-between',
           marginBottom: '8px'
         }}>
-          <span style={{ color: '#6b7280', fontSize: '14px' }}>加密密码:</span>
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>Encrypted Password:</span>
           <span style={{ 
             color: '#374151', 
             fontSize: '12px', 
@@ -156,8 +156,8 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
           justifyContent: 'space-between',
           marginBottom: '8px'
         }}>
-          <span style={{ color: '#6b7280', fontSize: '14px' }}>状态:</span>
-          <span style={{ color: '#10b981', fontSize: '14px' }}>✅ 活跃</span>
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>Status:</span>
+          <span style={{ color: '#10b981', fontSize: '14px' }}>✅ Active</span>
         </div>
       </div>
 
@@ -185,7 +185,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ imageId, isSelected, onSel
             e.currentTarget.style.background = isSelected ? '#10b981' : '#6366f1';
           }}
         >
-          选择此图片
+          Select This Image
         </button>
       </div>
     </div>

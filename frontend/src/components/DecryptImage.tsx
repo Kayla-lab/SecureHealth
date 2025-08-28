@@ -73,12 +73,12 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
     }
 
     setStep1Loading(true);
-    setStepResults(prev => ({ ...prev, step1: '正在从合约获取图片信息...' }));
+    setStepResults(prev => ({ ...prev, step1: 'Getting image info from contract...' }));
 
     try {
       const imageIdBigInt = BigInt(imageId);
       
-      // 调用合约的 getImageInfo 方法
+      // Call contract's getImageInfo method
       const imageInfo = await publicClient.readContract({
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
@@ -88,20 +88,20 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
 
       const [uploader, ipfsHashFromContract, timestamp] = imageInfo;
 
-      setStepResults(prev => ({ ...prev, step1: '正在从IPFS下载加密图片...' }));
+      setStepResults(prev => ({ ...prev, step1: 'Downloading encrypted image from IPFS...' }));
       
-      // 模拟IPFS下载延迟
+      // Simulate IPFS download delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 获取真实的加密数据 (模拟从IPFS获取的加密图片数据)
+      // Get real encrypted data (simulated encrypted image data from IPFS)
       const mockEncryptedData = CryptoJS.AES.encrypt("mock_image_data_from_ipfs_" + imageId, "temp_password").toString();
       
-      // 使用真实的加密数据生成乱码图片
+      // Generate scrambled image using real encrypted data
       const encryptedImageDisplay = generateEncryptedImageDisplay(mockEncryptedData);
       setEncryptedImageData(encryptedImageDisplay);
-      setStepResults(prev => ({ ...prev, step1: '✓ 成功从IPFS获取加密图片' }));
+      setStepResults(prev => ({ ...prev, step1: '✓ Successfully retrieved encrypted image from IPFS' }));
       
-      console.log('步骤1完成: 获取加密图片', {
+      console.log('Step 1 completed: Retrieved encrypted image', {
         imageId,
         uploader,
         ipfsHash: ipfsHashFromContract,
@@ -109,27 +109,27 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
       });
 
     } catch (error) {
-      console.error('步骤1失败:', error);
-      setStepResults(prev => ({ ...prev, step1: `步骤1失败: ${error instanceof Error ? error.message : '未知错误'}` }));
+      console.error('Step 1 failed:', error);
+      setStepResults(prev => ({ ...prev, step1: `Step 1 failed: ${error instanceof Error ? error.message : 'Unknown error'}` }));
     } finally {
       setStep1Loading(false);
     }
   };
 
-  // 步骤2: 解密加密密码
+  // Step 2: Decrypt encrypted password
   const step2DecryptPassword = async () => {
     if (!fhevmInstance || !address || !walletClient || !publicClient || !imageId) {
-      alert('请确保钱包已连接，FHEVM实例已就绪，并已选择图片');
+      alert('Please ensure wallet is connected, FHEVM instance is ready, and image is selected');
       return;
     }
 
     setStep2Loading(true);
-    setStepResults(prev => ({ ...prev, step2: '正在获取加密密码handle...' }));
+    setStepResults(prev => ({ ...prev, step2: 'Getting encrypted password handle...' }));
 
     try {
       const imageIdBigInt = BigInt(imageId);
       
-      // 获取加密密码handle
+      // Get encrypted password handle
       const encryptedPasswordHandle = await publicClient.readContract({
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
@@ -137,12 +137,12 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         args: [imageIdBigInt],
       }) as string;
 
-      setStepResults(prev => ({ ...prev, step2: '正在生成解密密钥对...' }));
+      setStepResults(prev => ({ ...prev, step2: 'Generating decryption keypair...' }));
 
-      // 生成密钥对
+      // Generate keypair
       const keypair = fhevmInstance.generateKeypair();
       
-      // 准备解密请求
+      // Prepare decryption request
       const handleContractPairs = [{
         handle: encryptedPasswordHandle,
         contractAddress: CONTRACT_ADDRESS,
@@ -152,9 +152,9 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
       const durationDays = "10";
       const contractAddresses = [CONTRACT_ADDRESS];
 
-      setStepResults(prev => ({ ...prev, step2: '正在创建签名数据...' }));
+      setStepResults(prev => ({ ...prev, step2: 'Creating signature data...' }));
 
-      // 创建EIP712签名数据
+      // Create EIP712 signature data
       const eip712 = fhevmInstance.createEIP712(
         keypair.publicKey,
         contractAddresses,
@@ -162,11 +162,11 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         durationDays
       );
 
-      setStepResults(prev => ({ ...prev, step2: '请在钱包中签名以授权解密...' }));
+      setStepResults(prev => ({ ...prev, step2: 'Please sign in wallet to authorize decryption...' }));
 
-      // 请求用户签名
+      // Request user signature
       if (!walletClient.signTypedData) {
-        throw new Error('钱包不支持签名功能');
+        throw new Error('Wallet does not support signing functionality');
       }
 
       const signature = await walletClient.signTypedData({
@@ -178,9 +178,9 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         message: eip712.message,
       });
 
-      setStepResults(prev => ({ ...prev, step2: '正在执行FHE解密...' }));
+      setStepResults(prev => ({ ...prev, step2: 'Executing FHE decryption...' }));
       
-      // 执行用户解密
+      // Execute user decryption
       const result = await fhevmInstance.userDecrypt(
         handleContractPairs,
         keypair.privateKey,
@@ -194,52 +194,52 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
 
       const password = result[encryptedPasswordHandle];
       setDecryptedPassword(password);
-      setStepResults(prev => ({ ...prev, step2: `✓ 密码解密成功: ${password}` }));
+      setStepResults(prev => ({ ...prev, step2: `✓ Password decryption successful: ${password}` }));
       
-      console.log('步骤2完成: 密码解密成功', password);
+      console.log('Step 2 completed: Password decryption successful', password);
 
     } catch (error) {
-      console.error('步骤2失败:', error);
-      setStepResults(prev => ({ ...prev, step2: `步骤2失败: ${error instanceof Error ? error.message : '未知错误'}` }));
+      console.error('Step 2 failed:', error);
+      setStepResults(prev => ({ ...prev, step2: `Step 2 failed: ${error instanceof Error ? error.message : 'Unknown error'}` }));
     } finally {
       setStep2Loading(false);
     }
   };
 
-  // 步骤3: 用密码解密图片 (伪解密，直接显示CT.jpeg)
+  // Step 3: Decrypt image with password (mock decryption, directly display CT.jpeg)
   const step3DecryptImage = async () => {
     if (!decryptedPassword || !encryptedImageData) {
-      alert('请先完成前两个步骤');
+      alert('Please complete the first two steps first');
       return;
     }
 
     setStep3Loading(true);
-    setStepResults(prev => ({ ...prev, step3: '正在验证密码格式...' }));
+    setStepResults(prev => ({ ...prev, step3: 'Validating password format...' }));
 
     try {
-      // 模拟验证密码
+      // Simulate password validation
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      setStepResults(prev => ({ ...prev, step3: '正在使用密码解密图片...' }));
+      setStepResults(prev => ({ ...prev, step3: 'Decrypting image with password...' }));
       
-      // 模拟AES解密过程
+      // Simulate AES decryption process
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 直接显示CT.jpeg
+      // Directly display CT.jpeg
       setDecryptedImage('/CT.jpeg');
-      setStepResults(prev => ({ ...prev, step3: '✓ 图片解密成功！' }));
+      setStepResults(prev => ({ ...prev, step3: '✓ Image decryption successful!' }));
       
-      console.log('步骤3完成: 图片解密成功');
+      console.log('Step 3 completed: Image decryption successful');
 
     } catch (error) {
-      console.error('步骤3失败:', error);
-      setStepResults(prev => ({ ...prev, step3: `步骤3失败: ${error instanceof Error ? error.message : '未知错误'}` }));
+      console.error('Step 3 failed:', error);
+      setStepResults(prev => ({ ...prev, step3: `Step 3 failed: ${error instanceof Error ? error.message : 'Unknown error'}` }));
     } finally {
       setStep3Loading(false);
     }
   };
 
-  // 重置所有状态
+  // Reset all states
   const resetAllSteps = () => {
     setEncryptedImageData('');
     setDecryptedPassword('');
@@ -249,18 +249,18 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
 
   return (
     <div className="decrypt-image">
-      <h3>🔓 3步解密流程</h3>
+      <h3>🔓 3-Step Decryption Process</h3>
       
       <div style={{ marginBottom: '20px' }}>
         <label htmlFor="imageId" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-          图片ID:
+          Image ID:
         </label>
         <input
           id="imageId"
           type="text"
           value={imageId}
           onChange={(e) => setImageId(e.target.value)}
-          placeholder="输入要解密的图片ID或从图片列表选择"
+          placeholder="Enter the image ID to decrypt or select from the image list"
           style={{
             width: '100%',
             padding: '12px',
@@ -271,7 +271,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         />
       </div>
 
-      {/* 步骤1: 从IPFS拉取加密图片 */}
+      {/* Step 1: Fetch encrypted image from IPFS */}
       <div className="decrypt-step" style={{ 
         marginBottom: '20px',
         padding: '20px',
@@ -280,7 +280,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         backgroundColor: encryptedImageData ? '#f0fdf4' : '#f8f9fa'
       }}>
         <h4 style={{ margin: '0 0 12px 0', color: '#374151' }}>
-          步骤1: 📥 从IPFS获取加密图片
+          Step 1: 📥 Fetch Encrypted Image from IPFS
         </h4>
         
         <button
@@ -298,7 +298,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
             marginBottom: '12px'
           }}
         >
-          {step1Loading ? '🔄 获取中...' : (encryptedImageData ? '✅ 已完成' : '开始获取')}
+          {step1Loading ? '🔄 Fetching...' : (encryptedImageData ? '✅ Completed' : 'Start Fetching')}
         </button>
 
         {stepResults.step1 && (
@@ -317,10 +317,10 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
 
         {encryptedImageData && (
           <div>
-            <p style={{ margin: '0 0 8px 0', fontWeight: '500', color: '#374151' }}>加密图片预览:</p>
+            <p style={{ margin: '0 0 8px 0', fontWeight: '500', color: '#374151' }}>Encrypted Image Preview:</p>
             <img 
               src={encryptedImageData} 
-              alt="加密后的乱码图片" 
+              alt="Encrypted scrambled image" 
               style={{ 
                 maxWidth: '300px', 
                 height: 'auto',
@@ -332,7 +332,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         )}
       </div>
 
-      {/* 步骤2: 解密加密密码 */}
+      {/* Step 2: Decrypt encrypted password */}
       <div className="decrypt-step" style={{ 
         marginBottom: '20px',
         padding: '20px',
@@ -341,7 +341,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         backgroundColor: decryptedPassword ? '#f0fdf4' : '#f8f9fa'
       }}>
         <h4 style={{ margin: '0 0 12px 0', color: '#374151' }}>
-          步骤2: 🔐 解密FHE加密密码
+          Step 2: 🔐 Decrypt FHE Encrypted Password
         </h4>
         
         <button
@@ -359,7 +359,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
             marginBottom: '12px'
           }}
         >
-          {step2Loading ? '🔄 解密中...' : (decryptedPassword ? '✅ 已完成' : '开始解密密码')}
+          {step2Loading ? '🔄 Decrypting...' : (decryptedPassword ? '✅ Completed' : 'Start Decrypting Password')}
         </button>
 
         {stepResults.step2 && (
@@ -378,7 +378,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
 
         {decryptedPassword && (
           <div>
-            <p style={{ margin: '0 0 8px 0', fontWeight: '500', color: '#374151' }}>解密后的密码:</p>
+            <p style={{ margin: '0 0 8px 0', fontWeight: '500', color: '#374151' }}>Decrypted Password:</p>
             <code style={{
               background: '#f1f5f9',
               padding: '12px',
@@ -395,7 +395,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         )}
       </div>
 
-      {/* 步骤3: 解密图片 */}
+      {/* Step 3: Decrypt image */}
       <div className="decrypt-step" style={{ 
         marginBottom: '20px',
         padding: '20px',
@@ -404,7 +404,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         backgroundColor: decryptedImage ? '#f0fdf4' : '#f8f9fa'
       }}>
         <h4 style={{ margin: '0 0 12px 0', color: '#374151' }}>
-          步骤3: 🖼️ 用密码解密图片
+          Step 3: 🖼️ Decrypt Image with Password
         </h4>
         
         <button
@@ -422,7 +422,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
             marginBottom: '12px'
           }}
         >
-          {step3Loading ? '🔄 解密中...' : (decryptedImage ? '✅ 已完成' : '开始解密图片')}
+          {step3Loading ? '🔄 Decrypting...' : (decryptedImage ? '✅ Completed' : 'Start Decrypting Image')}
         </button>
 
         {stepResults.step3 && (
@@ -441,10 +441,10 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
 
         {decryptedImage && (
           <div>
-            <p style={{ margin: '0 0 8px 0', fontWeight: '500', color: '#374151' }}>解密后的图片:</p>
+            <p style={{ margin: '0 0 8px 0', fontWeight: '500', color: '#374151' }}>Decrypted Image:</p>
             <img 
               src={decryptedImage} 
-              alt="解密后的图片" 
+              alt="Decrypted image" 
               style={{ 
                 maxWidth: '300px', 
                 height: 'auto',
@@ -456,7 +456,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
         )}
       </div>
 
-      {/* 重置按钮 */}
+      {/* Reset button */}
       {(encryptedImageData || decryptedPassword || decryptedImage) && (
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <button 
@@ -471,18 +471,18 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
               fontSize: '14px'
             }}
           >
-            🔄 重新开始
+            🔄 Start Over
           </button>
         </div>
       )}
 
       <div style={{ fontSize: '12px', color: '#666', marginTop: '20px', padding: '16px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' }}>
-        <strong>💡 系统说明:</strong>
+        <strong>💡 System Instructions:</strong>
         <ul style={{ marginLeft: '20px', marginTop: '8px' }}>
-          <li>步骤1：从区块链合约获取IPFS hash，模拟从IPFS下载加密图片并显示乱码效果</li>
-          <li>步骤2：使用Zama FHE技术，通过用户签名解密区块链上的加密密码</li>
-          <li>步骤3：使用解密后的密码解密图片，显示原始CT图片</li>
-          <li>所有操作基于真实的区块链合约和FHE解密技术</li>
+          <li>Step 1: Get IPFS hash from blockchain contract, simulate downloading encrypted image from IPFS and display scrambled effect</li>
+          <li>Step 2: Use Zama FHE technology to decrypt encrypted password on blockchain through user signature</li>
+          <li>Step 3: Use decrypted password to decrypt image, display original CT image</li>
+          <li>All operations are based on real blockchain contracts and FHE decryption technology</li>
         </ul>
       </div>
     </div>
