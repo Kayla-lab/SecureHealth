@@ -10,7 +10,7 @@
 .app-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 2rem 2rem;
+  padding: 1.5rem 2rem;
   margin-bottom: 0;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
@@ -30,23 +30,23 @@
 }
 
 .title-section h1 {
-  font-size: 3rem;
+  font-size: 2rem;
   color: white;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .title-section h1::before {
   content: '🏥';
-  font-size: 2.5rem;
+  font-size: 1.8rem;
 }
 
 .title-section p {
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   color: rgba(255,255,255,0.9);
   margin: 0;
   font-weight: 300;
@@ -60,8 +60,8 @@
 .app-main {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
-  padding: 3rem 2rem;
+  gap: 2rem;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -71,10 +71,10 @@
 .decrypt-section,
 .info-section {
   background: white;
-  padding: 3rem;
-  border-radius: 20px;
+  padding: 1.8rem;
+  border-radius: 16px;
   border: none;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -90,11 +90,11 @@
 .my-images-section h2,
 .decrypt-section h2,
 .info-section h2 {
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
   color: #2c3e50;
-  border-bottom: 3px solid #3498db;
-  padding-bottom: 1rem;
-  font-size: 1.8rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.6rem;
+  font-size: 1.3rem;
   font-weight: 600;
   position: relative;
 }
@@ -107,14 +107,14 @@
 .step-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.2rem;
 }
 
 .step {
   background: #f8f9fb;
-  padding: 2rem;
-  border-radius: 15px;
-  border: 2px solid #e8ecf0;
+  padding: 1.2rem;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -138,8 +138,8 @@
 
 .step h3 {
   color: #2c3e50;
-  margin-bottom: 1.5rem;
-  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -185,19 +185,19 @@
 .loading {
   color: #34495e;
   font-style: normal;
-  padding: 3rem;
+  padding: 1.5rem;
   text-align: center;
   background: linear-gradient(135deg, #f8f9fb, #e8ecf0);
-  border-radius: 15px;
-  border: 2px dashed #bdc3c7;
+  border-radius: 12px;
+  border: 1px dashed #bdc3c7;
   position: relative;
 }
 
 .loading::before {
   content: '⚕️';
-  font-size: 2rem;
+  font-size: 1.5rem;
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
   animation: pulse 2s infinite;
 }
 
@@ -210,11 +210,11 @@
   background: linear-gradient(135deg, #d4edda, #c3e6cb);
   border: 2px solid #28a745;
   color: #155724;
-  padding: 2rem;
-  border-radius: 15px;
-  margin-top: 2rem;
+  padding: 1.2rem;
+  border-radius: 12px;
+  margin-top: 1.2rem;
   position: relative;
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.2);
 }
 
 .success-message::before {
@@ -231,18 +231,19 @@
 .success-message h3 {
   margin-bottom: 0.5rem;
   color: #155724;
+  font-size: 1.1rem;
 }
 
 .selected-image-info {
   background: linear-gradient(135deg, #e3f2fd, #bbdefb);
   border: 2px solid #2196f3;
   color: #0d47a1;
-  padding: 1.5rem;
-  border-radius: 15px;
-  margin-bottom: 2rem;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.2rem;
   text-align: center;
   position: relative;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+  box-shadow: 0 3px 12px rgba(33, 150, 243, 0.2);
 }
 
 .selected-image-info::before {
@@ -291,12 +292,13 @@ button {
   background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
 button:hover {
@@ -312,10 +314,10 @@ button:disabled {
 }
 
 input[type="text"], input[type="number"], textarea {
-  border: 2px solid #e8ecf0;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 1rem;
+  border: 1px solid #e8ecf0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
   transition: border-color 0.3s ease;
   background: white;
 }
@@ -330,10 +332,10 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -364,10 +366,10 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 /* Medical card styling */
 .medical-card {
   background: white;
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-  border-left: 4px solid #3498db;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  border-left: 3px solid #3498db;
   transition: all 0.3s ease;
 }
 
@@ -379,19 +381,19 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 .medical-card-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.8rem;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
   border-bottom: 1px solid #ecf0f1;
 }
 
 .medical-card-icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #3498db;
 }
 
 .medical-card-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
   margin: 0;
@@ -416,10 +418,10 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 .medical-alert {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin: 1rem 0;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 10px;
+  margin: 0.8rem 0;
   position: relative;
   overflow: hidden;
 }
@@ -435,29 +437,31 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 }
 
 .medical-alert-icon {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   margin-top: 0.1rem;
 }
 
 .medical-alert-content h4 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.3rem 0;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .medical-alert-content p {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
+  font-size: 0.85rem;
 }
 
 /* Navigation breadcrumb */
 .medical-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding: 1rem;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.8rem;
   background: rgba(255,255,255,0.9);
-  border-radius: 10px;
+  border-radius: 8px;
   backdrop-filter: blur(10px);
 }
 
@@ -465,6 +469,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
   color: #7f8c8d;
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.8rem;
 }
 
 .medical-breadcrumb-item.active {
@@ -474,7 +479,68 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 
 .medical-breadcrumb-separator {
   color: #bdc3c7;
-  margin: 0 0.5rem;
+  margin: 0 0.3rem;
+  font-size: 0.8rem;
+}
+
+/* Additional refinements */
+.info-content ol, .info-content ul {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.info-content li {
+  margin-bottom: 0.4rem;
+}
+
+.info-content strong {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Compact grid layout for larger screens */
+@media (min-width: 992px) {
+  .step-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Enhanced hover effects */
+.upload-section:hover,
+.my-images-section:hover,
+.decrypt-section:hover,
+.info-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+.medical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.step:hover {
+  border-color: #3498db;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+}
+
+/* Refined typography */
+body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+}
+
+p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #5a6c7d;
 }
 
 /* Responsive design */
@@ -484,24 +550,29 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
   }
   
   .app-header {
-    padding: 1.5rem 1rem;
+    padding: 1rem;
   }
   
   .app-main {
-    padding: 2rem 1rem;
-    gap: 2rem;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
   }
   
   .upload-section,
   .my-images-section,
   .decrypt-section,
   .info-section {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+  
+  .medical-card {
+    padding: 1rem;
   }
   
   .header-content {
     flex-direction: column;
     text-align: center;
+    gap: 0.8rem;
   }
   
   .title-section {
@@ -509,7 +580,11 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
   }
   
   .title-section h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
+  }
+  
+  .title-section h1::before {
+    font-size: 1.4rem;
   }
   
   .step-container {
