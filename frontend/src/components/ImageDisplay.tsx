@@ -15,19 +15,19 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   const [password, setPassword] = useState<string>('');
   const [originalImageBase64, setOriginalImageBase64] = useState<string>('');
   
-  // 步骤状态
-  const [step1Complete, setStep1Complete] = useState(false); // 图片加载完成
-  const [step2Complete, setStep2Complete] = useState(false); // 密码生成完成
-  const [step3Complete, setStep3Complete] = useState(false); // AES加密完成
+  // Step status
+  const [step1Complete, setStep1Complete] = useState(false); // Image loading complete
+  const [step2Complete, setStep2Complete] = useState(false); // Password generation complete
+  const [step3Complete, setStep3Complete] = useState(false); // AES encryption complete
 
-  // 生成EVM地址格式的密码
+  // Generate EVM address format password
   const generateEvmPassword = () => {
-    // 生成40位十六进制字符串，前加0x
+    // Generate 40-bit hexadecimal string with 0x prefix
     const hexString = CryptoJS.lib.WordArray.random(20).toString();
     return '0x' + hexString;
   };
 
-  // 将图片转换为Base64
+  // Convert image to Base64
   const imageToBase64 = (imageUrl: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -52,20 +52,20 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     });
   };
 
-  // AES加密图片
+  // AES encrypt image
   const encryptImage = async (imageBase64: string, password: string) => {
     try {
       const encrypted = CryptoJS.AES.encrypt(imageBase64, password).toString();
       return encrypted;
     } catch (error) {
-      console.error('加密失败:', error);
+      console.error('Encryption failed:', error);
       throw error;
     }
   };
 
-  // 生成加密后的乱码图片显示
+  // Generate encrypted scrambled image display
   const generateEncryptedImageDisplay = (encryptedData: string) => {
-    // 将加密数据转换为可视化的乱码图片
+    // Convert encrypted data to visualized scrambled image
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
@@ -73,11 +73,11 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     canvas.width = 400;
     canvas.height = 300;
 
-    // 用加密数据生成随机像素
+    // Generate random pixels using encrypted data
     const imageData = ctx.createImageData(400, 300);
     const data = imageData.data;
 
-    // 使用加密字符串生成伪随机数据
+    // Use encrypted string to generate pseudo-random data
     const hash = CryptoJS.SHA256(encryptedData).toString();
     let hashIndex = 0;
 
@@ -97,7 +97,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     return canvas.toDataURL('image/png');
   };
 
-  // 加载原始图片
+  // Load original image
   const loadOriginalImage = async () => {
     try {
       const imageBase64 = await imageToBase64('/CT.jpeg');
@@ -105,11 +105,11 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
       setOriginalImage('data:image/jpeg;base64,' + imageBase64);
       setStep1Complete(true);
     } catch (error) {
-      console.error('加载图片失败:', error);
+      console.error('Failed to load image:', error);
     }
   };
 
-  // 生成随机密码
+  // Generate random password
   const handleGeneratePassword = () => {
     const newPassword = generateEvmPassword();
     setPassword(newPassword);
@@ -117,26 +117,26 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     setStep2Complete(true);
   };
 
-  // 处理AES加密
+  // Handle AES encryption
   const handleAESEncrypt = async () => {
     if (!originalImageBase64 || !password) return;
     
     try {
-      // 加密图片
+      // Encrypt image
       const encrypted = await encryptImage(originalImageBase64, password);
       
-      // 生成乱码图片显示
+      // Generate scrambled image display
       const encryptedImageDisplay = generateEncryptedImageDisplay(encrypted);
       setEncryptedImage(encryptedImageDisplay);
       
       onEncryptedImageGenerated?.(encrypted);
       setStep3Complete(true);
     } catch (error) {
-      console.error('加密失败:', error);
+      console.error('Encryption failed:', error);
     }
   };
 
-  // 重置所有状态
+  // Reset all states
   const resetSteps = () => {
     setOriginalImage('');
     setEncryptedImage('');
@@ -148,30 +148,30 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   };
 
   useEffect(() => {
-    // 组件加载时自动加载原始图片
+    // Automatically load original image when component loads
     loadOriginalImage();
   }, []);
 
   return (
     <div className="image-display">
-      {/* 步骤1: 显示原始图片 */}
+      {/* Step 1: Display original image */}
       <div className="step-section">
-        <h4>📸 原始图片</h4>
+        <h4>📸 Original Image</h4>
         {originalImage ? (
-          <img src={originalImage} alt="原始图片" style={{ maxWidth: '300px', height: 'auto', border: '1px solid #ddd', borderRadius: '8px' }} />
+          <img src={originalImage} alt="Original Image" style={{ maxWidth: '300px', height: 'auto', border: '1px solid #ddd', borderRadius: '8px' }} />
         ) : (
-          <div className="loading">加载中...</div>
+          <div className="loading">Loading...</div>
         )}
         {step1Complete && (
           <div style={{ marginTop: '10px', color: '#28a745', fontSize: '14px' }}>
-            ✅ 图片加载完成
+            ✅ Image loading complete
           </div>
         )}
       </div>
 
-      {/* 步骤2: 生成随机密码 */}
+      {/* Step 2: Generate random password */}
       <div className="step-section" style={{ marginTop: '20px' }}>
-        <h4>🔑 生成EVM地址格式密码</h4>
+        <h4>🔑 Generate EVM Address Format Password</h4>
         {step2Complete ? (
           <div>
             <code style={{ 
@@ -186,7 +186,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
               {password}
             </code>
             <div style={{ marginTop: '10px', color: '#28a745', fontSize: '14px' }}>
-              ✅ 密码生成完成
+              ✅ Password generation complete
             </div>
           </div>
         ) : (
@@ -204,19 +204,19 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
               fontWeight: '500'
             }}
           >
-            生成随机密码
+            Generate Random Password
           </button>
         )}
       </div>
 
-      {/* 步骤3: AES加密图片 */}
+      {/* Step 3: AES encrypt image */}
       <div className="step-section" style={{ marginTop: '20px' }}>
-        <h4>🔐 AES加密图片</h4>
+        <h4>🔐 AES Encrypt Image</h4>
         {step3Complete ? (
           <div>
             <img 
               src={encryptedImage} 
-              alt="加密后的乱码图片" 
+              alt="Encrypted scrambled image" 
               style={{ 
                 maxWidth: '300px', 
                 height: 'auto',
@@ -225,7 +225,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
               }} 
             />
             <div style={{ marginTop: '10px', color: '#28a745', fontSize: '14px' }}>
-              ✅ AES加密完成
+              ✅ AES encryption complete
             </div>
           </div>
         ) : step2Complete ? (
@@ -242,16 +242,16 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
               fontWeight: '500'
             }}
           >
-            AES加密图片
+            AES Encrypt Image
           </button>
         ) : (
           <div style={{ color: '#6c757d', fontSize: '14px' }}>
-            请先生成密码
+            Please generate password first
           </div>
         )}
       </div>
 
-      {/* 重置按钮 */}
+      {/* Reset button */}
       {(step2Complete || step3Complete) && (
         <div style={{ marginTop: '30px', textAlign: 'center' }}>
           <button 
@@ -266,7 +266,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
               fontSize: '14px'
             }}
           >
-            重新开始
+            Restart
           </button>
         </div>
       )}

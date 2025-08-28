@@ -14,7 +14,7 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
   const publicClient = usePublicClient();
   const [imageId, setImageId] = useState<string>('');
   
-  // 3步解密流程状态
+  // 3-step decryption process status
   const [step1Loading, setStep1Loading] = useState(false);
   const [step2Loading, setStep2Loading] = useState(false);
   const [step3Loading, setStep3Loading] = useState(false);
@@ -24,9 +24,9 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
   const [decryptedImage, setDecryptedImage] = useState<string>('');
   const [stepResults, setStepResults] = useState<{[key: string]: string}>({});
 
-  // 生成加密后的乱码图片显示 (与ImageDisplay组件中的方法相同)
+  // Generate encrypted scrambled image display (same method as in ImageDisplay component)
   const generateEncryptedImageDisplay = (encryptedData: string) => {
-    // 将加密数据转换为可视化的乱码图片
+    // Convert encrypted data to visualized scrambled image
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
@@ -34,11 +34,11 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
     canvas.width = 400;
     canvas.height = 300;
 
-    // 用加密数据生成随机像素
+    // Generate random pixels using encrypted data
     const imageData = ctx.createImageData(400, 300);
     const data = imageData.data;
 
-    // 使用加密字符串生成伪随机数据
+    // Use encrypted string to generate pseudo-random data
     const hash = CryptoJS.SHA256(encryptedData).toString();
     let hashIndex = 0;
 
@@ -58,17 +58,17 @@ export const DecryptImage: React.FC<DecryptImageProps> = ({ fhevmInstance, selec
     return canvas.toDataURL('image/png');
   };
 
-  // 监听选中的图片ID变化
+  // Listen for changes in selected image ID
   useEffect(() => {
     if (selectedImageId !== null && selectedImageId !== undefined) {
       setImageId(selectedImageId.toString());
     }
   }, [selectedImageId]);
 
-  // 步骤1: 从IPFS拉取加密图片 (伪拉取，显示马赛克图片)
+  // Step 1: Fetch encrypted image from IPFS (simulated fetch, display mosaic image)
   const step1FetchFromIPFS = async () => {
     if (!imageId || !publicClient) {
-      alert('请输入图片ID并确保钱包已连接');
+      alert('Please enter image ID and ensure wallet is connected');
       return;
     }
 

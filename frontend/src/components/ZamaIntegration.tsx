@@ -20,18 +20,18 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<string>('');
 
-  // 合约地址 (Sepolia testnet)
+  // Contract address (Sepolia testnet)
   const CONTRACT_ADDRESS = '0x953303a9Bda0A8264a1e936Bc9996b536DE02786';
 
-  // 初始化FHEVM实例
+  // Initialize FHEVM instance
   useEffect(() => {
     const initFHEVM = async () => {
       try {
-        // 初始化SDK
+        // Initialize SDK
         const { initSDK } = await import('@zama-fhe/relayer-sdk/bundle');
         await initSDK();
 
-        // 创建实例
+        // Create instance
         const config = {
           ...SepoliaConfig,
           network: window.ethereum
@@ -39,9 +39,9 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
         
         const instance = await createInstance(config);
         setFhevmInstance(instance);
-        console.log('FHEVM实例初始化成功');
+        console.log('FHEVM instance initialized successfully');
       } catch (error) {
-        console.error('FHEVM初始化失败:', error);
+        console.error('FHEVM initialization failed:', error);
       }
     };
 
@@ -51,10 +51,10 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
   }, [isConnected]);
 
 
-  // 调用合约上传加密密码
+  // Call contract to upload encrypted password
   const uploadToContract = async () => {
     if (!fhevmInstance || !address || !password || !ipfsHash || !walletClient) {
-      alert('请确保钱包已连接，并且已生成密码和IPFS hash');
+      alert('Please ensure wallet is connected and password and IPFS hash are generated');
       return;
     }
 
@@ -62,39 +62,39 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
     setUploadResult('');
 
     try {
-      // 验证密码格式
+      // Validate password format
       if (!password || !password.startsWith('0x') || password.length !== 42) {
-        throw new Error('密码格式不正确，应该是有效的EVM地址格式');
+        throw new Error('Incorrect password format, should be valid EVM address format');
       }
 
-      // 创建加密输入
+      // Create encrypted input
       const input = fhevmInstance.createEncryptedInput(CONTRACT_ADDRESS, address);
       
-      // 将EVM地址格式的密码加密
+      // Encrypt EVM address format password
       try {
-        // 尝试使用 add160 方法（地址是 160 位）
+        // Try using add160 method (address is 160 bits)
         const addressAsBigInt = BigInt(password);
         input.add160(addressAsBigInt);
       } catch (add160Error) {
-        // 回退到 addAddress 方法
+        // Fall back to addAddress method
         try {
           input.addAddress(password);
         } catch (addAddressError) {
-          // 最后尝试使用32字节方法
+          // Finally try using 32-byte method
           const paddedAddress = '0x' + '0'.repeat(24) + password.slice(2);
           const addressAs32Bytes = BigInt(paddedAddress);
           input.add256(addressAs32Bytes);
         }
       }
       
-      // 加密输入
+      // Encrypt input
       const encryptedInput = await input.encrypt();
 
-      // 确保参数格式正确
+      // Ensure parameter format is correct
       let encryptedPasswordHandle = encryptedInput.handles[0];
       let inputProof = encryptedInput.inputProof;
       
-      // 将 Uint8Array 转换为 hex string（合约期望的格式）
+      // Convert Uint8Array to hex string (format expected by contract)
       if (inputProof instanceof Uint8Array) {
         inputProof = '0x' + Array.from(inputProof).map(b => b.toString(16).padStart(2, '0')).join('');
       }
@@ -103,7 +103,7 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
         encryptedPasswordHandle = '0x' + Array.from(encryptedPasswordHandle).map(b => b.toString(16).padStart(2, '0')).join('');
       }
 
-      // 准备合约调用参数
+      // Prepare contract call parameters
       const contractCallData = {
         address: CONTRACT_ADDRESS as `0x${string}`,
         abi: [
@@ -139,41 +139,41 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
         ],
         functionName: 'uploadImage' as const,
         args: [
-          encryptedPasswordHandle, // 加密的密码 handle
-          inputProof,              // 证明
+          encryptedPasswordHandle, // Encrypted password handle
+          inputProof,              // Proof
           ipfsHash                 // IPFS hash
         ]
       };
 
-      // 调用合约
+      // Call contract
       const hash = await walletClient.writeContract(contractCallData);
-      setUploadResult(`交易已提交! 交易Hash: ${hash}`);
+      setUploadResult(`Transaction submitted! Transaction Hash: ${hash}`);
       
-      // 等待交易确认
+      // Wait for transaction confirmation
       if (publicClient) {
-        setUploadResult(`交易已提交! 正在等待确认... 交易Hash: ${hash}`);
+        setUploadResult(`Transaction submitted! Waiting for confirmation... Transaction Hash: ${hash}`);
         const receipt = await publicClient.waitForTransactionReceipt({ hash });
         
-        // 从receipt logs中解析imageId
+        // Parse imageId from receipt logs
         if (receipt.logs && receipt.logs.length > 0) {
           const imageIdHex = receipt.logs[0].topics?.[1];
           if (imageIdHex) {
             const imageId = parseInt(imageIdHex, 16);
-            setUploadResult(`图片上传成功! Image ID: ${imageId}, 交易Hash: ${hash}`);
+            setUploadResult(`Image upload successful! Image ID: ${imageId}, Transaction Hash: ${hash}`);
             onContractCall?.(imageId);
           } else {
-            setUploadResult(`交易成功确认! 交易Hash: ${hash}`);
+            setUploadResult(`Transaction confirmed successfully! Transaction Hash: ${hash}`);
           }
         } else {
-          setUploadResult(`交易成功确认! 交易Hash: ${hash}`);
+          setUploadResult(`Transaction confirmed successfully! Transaction Hash: ${hash}`);
         }
       } else {
-        setUploadResult(`交易已提交! 交易Hash: ${hash} (无法自动确认)`);
+        setUploadResult(`Transaction submitted! Transaction Hash: ${hash} (unable to auto-confirm)`);
       }
       
     } catch (error) {
-      console.error('合约调用失败:', error);
-      setUploadResult(`上传失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      console.error('Contract call failed:', error);
+      setUploadResult(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
     }
@@ -181,26 +181,26 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
 
   return (
     <div className="zama-integration">
-      <h3>Zama FHE 合约集成</h3>
+      <h3>Zama FHE Contract Integration</h3>
       
       {!isConnected && (
-        <p style={{ color: '#dc3545' }}>请先连接钱包</p>
+        <p style={{ color: '#dc3545' }}>Please connect wallet first</p>
       )}
       
       {isConnected && !fhevmInstance && (
-        <p style={{ color: '#ffc107' }}>正在初始化FHEVM...</p>
+        <p style={{ color: '#ffc107' }}>Initializing FHEVM...</p>
       )}
 
       {fhevmInstance && (
         <div>
-          <p style={{ color: '#28a745', fontSize: '14px' }}>✓ FHEVM实例已就绪</p>
+          <p style={{ color: '#28a745', fontSize: '14px' }}>✓ FHEVM instance ready</p>
           
           <div style={{ marginBottom: '15px' }}>
-            <strong>当前状态:</strong>
+            <strong>Current Status:</strong>
             <ul style={{ marginLeft: '20px', fontSize: '14px' }}>
-              <li>钱包地址: {address}</li>
-              <li>密码: {password ? '✓ 已生成' : '✗ 未生成'}</li>
-              <li>IPFS Hash: {ipfsHash ? '✓ 已生成' : '✗ 未生成'}</li>
+              <li>Wallet Address: {address}</li>
+              <li>Password: {password ? '✓ Generated' : '✗ Not generated'}</li>
+              <li>IPFS Hash: {ipfsHash ? '✓ Generated' : '✗ Not generated'}</li>
             </ul>
           </div>
 
@@ -217,7 +217,7 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
               marginBottom: '15px'
             }}
           >
-            {isUploading ? '上传中...' : '上传到智能合约'}
+            {isUploading ? 'Uploading...' : 'Upload to Smart Contract'}
           </button>
 
           {uploadResult && (
@@ -233,11 +233,11 @@ export const ZamaIntegration: React.FC<ZamaIntegrationProps> = ({
           )}
 
           <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-            <strong>合约信息:</strong>
+            <strong>Contract Information:</strong>
             <ul style={{ marginLeft: '15px' }}>
-              <li>合约地址: {CONTRACT_ADDRESS}</li>
-              <li>网络: Sepolia 测试网</li>
-              <li>功能: 上传加密密码和IPFS Hash到区块链</li>
+              <li>Contract Address: {CONTRACT_ADDRESS}</li>
+              <li>Network: Sepolia Testnet</li>
+              <li>Function: Upload encrypted password and IPFS Hash to blockchain</li>
             </ul>
           </div>
         </div>

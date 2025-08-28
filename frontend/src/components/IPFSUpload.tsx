@@ -13,34 +13,34 @@ export const IPFSUpload: React.FC<IPFSUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [ipfsHash, setIpfsHash] = useState<string>('');
 
-  // 模拟IPFS上传，生成假的IPFS hash
+  // Simulate IPFS upload, generate fake IPFS hash
   const simulateIPFSUpload = async (data: string): Promise<string> => {
-    // 模拟网络延迟
+    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // 基于数据内容生成稳定的假IPFS hash
+    // Generate stable fake IPFS hash based on data content
     const hash = CryptoJS.SHA256(data).toString().substring(0, 46);
     return `Qm${hash}`;
   };
 
   const handleUpload = async () => {
     if (!encryptedImageData) {
-      alert('没有加密图片数据，请先生成加密图片');
+      alert('No encrypted image data, please generate encrypted image first');
       return;
     }
 
     setIsUploading(true);
     
     try {
-      // 模拟上传到IPFS
+      // Simulate upload to IPFS
       const hash = await simulateIPFSUpload(encryptedImageData);
       setIpfsHash(hash);
       onUploadComplete?.(hash);
       
-      console.log('模拟IPFS上传完成:', hash);
+      console.log('Simulated IPFS upload complete:', hash);
     } catch (error) {
-      console.error('IPFS上传失败:', error);
-      alert('上传失败，请重试');
+      console.error('IPFS upload failed:', error);
+      alert('Upload failed, please try again');
     } finally {
       setIsUploading(false);
     }
@@ -48,7 +48,7 @@ export const IPFSUpload: React.FC<IPFSUploadProps> = ({
 
   return (
     <div className="ipfs-upload">
-      <h3>IPFS上传 (模拟)</h3>
+      <h3>IPFS Upload</h3>
       
       <button
         onClick={handleUpload}
@@ -63,7 +63,7 @@ export const IPFSUpload: React.FC<IPFSUploadProps> = ({
           marginBottom: '15px'
         }}
       >
-        {isUploading ? '上传中...' : '上传到IPFS'}
+        {isUploading ? 'Uploading...' : 'Upload to IPFS'}
       </button>
 
       {ipfsHash && (
@@ -85,14 +85,14 @@ export const IPFSUpload: React.FC<IPFSUploadProps> = ({
             color: '#666', 
             marginTop: '8px' 
           }}>
-            注意: 这是模拟的IPFS hash，实际项目中需要连接真实的IPFS节点
+            Note: This is a simulated IPFS hash. In actual projects, you need to connect to real IPFS nodes
           </p>
         </div>
       )}
 
       {!encryptedImageData && (
         <p style={{ color: '#dc3545', fontSize: '14px' }}>
-          请先生成加密图片数据
+          Please generate encrypted image data first
         </p>
       )}
     </div>
