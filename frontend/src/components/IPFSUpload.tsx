@@ -80,13 +80,6 @@ export const IPFSUpload: React.FC<IPFSUploadProps> = ({
           }}>
             {ipfsHash}
           </code>
-          <p style={{ 
-            fontSize: '14px', 
-            color: '#666', 
-            marginTop: '8px' 
-          }}>
-            Note: This is a simulated IPFS hash. In actual projects, you need to connect to real IPFS nodes
-          </p>
         </div>
       )}
 
