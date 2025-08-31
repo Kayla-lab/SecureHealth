@@ -19,8 +19,6 @@ const PRIVATE_KEY: string = process.env.PRIVATE_KEY || "0x00000";
 const MNEMONIC: string = process.env.MNEMONIC || "test test test test test test test test test test test junk";
 const ALCHEMY_API_KEY: string = process.env.ALCHEMY_API_KEY || "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
 
-console.log("PRIVATE_KEY:%s,%s",PRIVATE_KEY,ALCHEMY_API_KEY);
-
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   namedAccounts: {
